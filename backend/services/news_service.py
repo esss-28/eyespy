@@ -3,7 +3,7 @@ from services.sentiment_service import analyze_sentiment
 from services.keyword_service import extract_keywords
 import os
  
-NEWS_API_KEY = os.getenv(NEWS_API_KEY)  # ← paste your key
+NEWS_API_KEY = os.getenv("NEWS_API_KEY")  # ← paste your key
  
 SOURCE_RELIABILITY = {
     "Reuters": 0.95, "Associated Press": 0.94, "BBC News": 0.91,
