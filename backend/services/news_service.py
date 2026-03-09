@@ -1,6 +1,7 @@
 import requests
 from services.sentiment_service import analyze_sentiment
 from services.keyword_service import extract_keywords
+import os
  
 NEWS_API_KEY = os.getenv(NEWS_API_KEY)  # ← paste your key
  
