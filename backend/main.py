@@ -7,12 +7,20 @@ import os, time as _time, socket
 from dotenv import load_dotenv
 load_dotenv()
 
-# Windows IPv4 DNS fix — compatible with Python 3.12 + urllib3 + httpx
-import socket
-_orig_getaddrinfo = socket.getaddrinfo
-def _patched_getaddrinfo(host, port, family=0, type=0, proto=0, flags=0):
-    return _orig_getaddrinfo(host, port, socket.AF_INET, type, proto, flags)
-socket.getaddrinfo = _patched_getaddrinfo
+# # Windows IPv4 DNS fix — compatible with Python 3.12 + urllib3 + httpx
+# import socket
+# _orig_getaddrinfo = socket.getaddrinfo
+# def _patched_getaddrinfo(host, port, family=0, type=0, proto=0, flags=0):
+#     return _orig_getaddrinfo(host, port, socket.AF_INET, type, proto, flags)
+# socket.getaddrinfo = _patched_getaddrinfo
+
+# Windows-only IPv4 DNS fix
+import sys
+if sys.platform == "win32":
+    _orig_getaddrinfo = socket.getaddrinfo
+    def _patched_getaddrinfo(host, port, family=0, type=0, proto=0, flags=0):
+        return _orig_getaddrinfo(host, port, socket.AF_INET, type, proto, flags)
+    socket.getaddrinfo = _patched_getaddrinfo
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
