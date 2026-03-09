@@ -1,261 +1,404 @@
 "use client"
+import { useState, useEffect } from "react"
+import dynamic from "next/dynamic"
+import Sidebar          from "@/components/Sidebar"
+import NewsFeed         from "@/components/NewsFeed"
+import MarketTicker     from "@/components/MarketTicker"
+import Chatbot          from "@/components/Chatbot"
+import NewsletterSignup from "@/components/NewsletterSignup"
+import EconomicIndex    from "@/components/EconomicIndex"
+import PredictFuture    from "@/components/PredictFuture"
 
-import { useEffect, useState } from "react"
-import Globe from "../components/Globe"
-import LiveStream from "../components/LiveStream"
-import ConflictChart from "../components/ConflictChart"
-import NewsFeed from "../components/NewsFeed"
-import Sidebar from "../components/Sidebar"
-import Chatbot from "../components/Chatbot"
-import MarketTicker from "../components/MarketTicker"
-import TimeMachine from "../components/TimeMachine"
-import NewsletterSignup from "../components/NewsletterSignup"
-import PerspectiveToggle from "../components/PerspectiveToggle"
+const Globe             = dynamic(() => import("@/components/Globe"),             { ssr: false })
+const TimeMachine       = dynamic(() => import("@/components/TimeMachine"),       { ssr: false })
+const LiveStream        = dynamic(() => import("@/components/LiveStream"),        { ssr: false })
+const PerspectiveToggle = dynamic(() => import("@/components/PerspectiveToggle"), { ssr: false })
+
+// ─────────────────────────────────────────────────
+const TABS = [
+  { id: "dashboard",    label: "Dashboard",    icon: "○" },
+  { id: "perspectives", label: "Perspectives", icon: "◎" },
+  { id: "predict",      label: "Predict",      icon: "△" },
+  { id: "timemachine",  label: "Time Machine", icon: "◷" },
+  { id: "analyst",      label: "AI Analyst",   icon: "◈" },
+  { id: "brief",        label: "Intel Brief",  icon: "✉" },
+]
 
 const BOOT_LINES = [
-  { text: "INITIALIZING EYESPY INTELLIGENCE NETWORK v4.2.1", delay: 0 },
-  { text: "ESTABLISHING ENCRYPTED SIGNAL CHANNELS [AES-256]...", delay: 320 },
-  { text: "LOADING GEOPOLITICAL RISK MODELS [XLM-ROBERTA / LSTM]...", delay: 640 },
-  { text: "CONNECTING TO NEWSAPI · GDELT · RSS FEEDS [247 SOURCES]...", delay: 960 },
-  { text: "CALIBRATING SENTIMENT ANALYSIS ENGINES...", delay: 1280 },
-  { text: "SYNCING MARKET DATA FEEDS [NYSE · LSE · CME]...", delay: 1600 },
-  { text: "ACTIVATING REAL-TIME WEBSOCKET STREAMS...", delay: 1920 },
-  { text: "ALL SYSTEMS NOMINAL — CLEARANCE LEVEL: ALPHA", delay: 2200 },
+  { text: "EYESPY INTELLIGENCE NETWORK v4.2.1",       type: "title" },
+  { text: "Initialising neural processing cores",     type: "sys" },
+  { text: "XLM-RoBERTa sentiment engine",             type: "ok" },
+  { text: "NewsAPI intelligence feeds",               type: "ok" },
+  { text: "WebSocket pulse stream",                   type: "ok" },
+  { text: "KeyBERT keyword extraction",               type: "ok" },
+  { text: "Conflict probability model",               type: "ok" },
+  { text: "Groq LLaMA-3.3-70B analyst",              type: "ok" },
+  { text: "Economic instability indices",             type: "ok" },
+  { text: "Predictive forecast engine",               type: "ok" },
+  { text: "APScheduler: 07:00 & 22:00 IST",          type: "ok" },
+  { text: "ALL SYSTEMS NOMINAL",                      type: "ready" },
 ]
 
-type Tab = "dashboard" | "perspectives" | "history" | "chat" | "brief"
-
-const TABS: { id: Tab; label: string }[] = [
-  { id: "dashboard",    label: "DASHBOARD"     },
-  { id: "perspectives", label: "PERSPECTIVES"  },
-  { id: "history",      label: "TIME MACHINE"  },
-  { id: "chat",         label: "AI ANALYST"    },
-  { id: "brief",        label: "◈ INTEL BRIEF" },
-]
-
+// ─────────────────────────────────────────────────
 export default function Home() {
-  const [activeTab, setActiveTab]   = useState<Tab>("dashboard")
-  const [time, setTime]             = useState(new Date())
-  const [booted, setBooted]         = useState(false)
-  const [visibleLines, setVisible]  = useState(0)
-  const [bootDone, setBootDone]     = useState(false)
+  const [booted,   setBooted]   = useState(false)
+  const [bootStep, setBootStep] = useState(0)
+  const [tab,      setTab]      = useState("dashboard")
+  const [time,     setTime]     = useState("")
+  const [date,     setDate]     = useState("")
 
   useEffect(() => {
-    BOOT_LINES.forEach((line, i) => {
-      setTimeout(() => setVisible(i + 1), line.delay)
-    })
-    setTimeout(() => setBootDone(true), 2600)
-    setTimeout(() => setBooted(true), 3000)
-  }, [])
+    if (bootStep < BOOT_LINES.length) {
+      const delay = bootStep === 0 ? 200 : 130
+      const t = setTimeout(() => setBootStep(s => s + 1), delay)
+      return () => clearTimeout(t)
+    } else {
+      const t = setTimeout(() => setBooted(true), 450)
+      return () => clearTimeout(t)
+    }
+  }, [bootStep])
 
   useEffect(() => {
-    const t = setInterval(() => setTime(new Date()), 1000)
+    const tick = () => {
+      const now = new Date()
+      setTime(now.toUTCString().slice(17, 25) + " UTC")
+      setDate(now.toLocaleDateString("en-GB", { day:"2-digit", month:"short", year:"numeric" }).toUpperCase())
+    }
+    tick()
+    const t = setInterval(tick, 1000)
     return () => clearInterval(t)
   }, [])
 
-  const pad = (n: number) => String(n).padStart(2, "0")
-  const utcTime = `${pad(time.getUTCHours())}:${pad(time.getUTCMinutes())}:${pad(time.getUTCSeconds())}`
-  const utcDate = time.toUTCString().slice(0, 16).toUpperCase()
-
+  // ── BOOT ────────────────────────────────────────
   if (!booted) {
     return (
       <div style={{
-        position: "fixed", inset: 0, background: "#030608",
-        display: "flex", flexDirection: "column",
-        alignItems: "center", justifyContent: "center",
-        gap: 4, fontFamily: "'Share Tech Mono', monospace"
+        height: "100vh", background: "#060a12",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        position: "relative",
       }}>
         <div className="grid-bg" />
-        <div className="vignette" />
-        <div style={{ marginBottom: 32, textAlign: "center" }}>
+
+        {/* Outer glow ring */}
+        <div style={{
+          position: "absolute",
+          width: 500, height: 500,
+          borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(41,182,246,0.04) 0%, transparent 70%)",
+          pointerEvents: "none",
+        }} />
+
+        <div style={{ zIndex: 1, width: 520 }}>
+          {/* Big title */}
           <div style={{
-            fontFamily: "'Orbitron', monospace", fontWeight: 900,
-            fontSize: 52, letterSpacing: "0.3em", color: "#fff",
-            textShadow: "0 0 40px rgba(0,210,255,0.6), 0 0 80px rgba(0,210,255,0.2)"
-          }}>EYESPY</div>
-          <div style={{
-            fontFamily: "'Orbitron', monospace", fontSize: 10,
-            letterSpacing: "0.5em", color: "rgba(0,210,255,0.6)", marginTop: 4
-          }}>GLOBAL INTELLIGENCE PLATFORM</div>
-        </div>
-        <div style={{ width: 540, display: "flex", flexDirection: "column", gap: 6 }}>
-          {BOOT_LINES.slice(0, visibleLines).map((line, i) => (
-            <div key={i} className="boot-line" style={{
-              color: i === visibleLines - 1 ? "#00d2ff" : "rgba(0,210,255,0.3)",
-              display: "flex", alignItems: "center", gap: 10
-            }}>
-              <span style={{ color: i === visibleLines - 1 ? "#00d2ff" : "rgba(0,255,157,0.4)" }}>
-                {i === visibleLines - 1 ? "▶" : "✓"}
-              </span>
-              {line.text}
-              {i === visibleLines - 1 && !bootDone && (
-                <span style={{ animation: "livePulse 0.6s infinite" }}>_</span>
-              )}
-            </div>
-          ))}
-        </div>
-        {bootDone && (
-          <div style={{
-            marginTop: 28, fontFamily: "'Orbitron', monospace",
-            fontSize: 10, letterSpacing: "0.4em",
-            color: "#00ff9d", textShadow: "0 0 20px rgba(0,255,157,0.8)",
-            animation: "livePulse 1s ease infinite"
+            fontFamily: "var(--font-display)",
+            fontSize: 72, letterSpacing: "0.12em",
+            color: "#29b6f6",
+            textShadow: "0 0 60px rgba(41,182,246,0.4)",
+            lineHeight: 1, marginBottom: 6,
           }}>
-            ◈ INTELLIGENCE NETWORK ONLINE ◈
+            EYESPY
           </div>
-        )}
+          <div style={{
+            fontFamily: "var(--font-body)", fontSize: 13,
+            color: "rgba(41,182,246,0.45)", letterSpacing: "0.35em",
+            fontWeight: 500, marginBottom: 36,
+          }}>
+            GLOBAL INTELLIGENCE PLATFORM
+          </div>
+
+          {/* Boot lines */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 24 }}>
+            {BOOT_LINES.slice(0, bootStep).map((line, i) => (
+              <div key={i} className="boot-line"
+                style={{
+                  animationDelay: `${i * 0.03}s`,
+                  display: "flex", alignItems: "center", gap: 12,
+                }}>
+                {line.type === "ok" && (
+                  <span style={{ color: "rgba(16,185,129,0.6)", fontSize: 10, minWidth: 14 }}>✓</span>
+                )}
+                {line.type === "sys" && (
+                  <span style={{ color: "rgba(41,182,246,0.4)", fontSize: 10, minWidth: 14 }}>›</span>
+                )}
+                {(line.type === "title" || line.type === "ready") && (
+                  <span style={{ minWidth: 14 }}></span>
+                )}
+                <span style={{
+                  color: line.type === "ready" ? "#10b981"
+                       : line.type === "title" ? "#29b6f6"
+                       : line.type === "ok"    ? "rgba(130,200,220,0.65)"
+                       : "rgba(130,200,220,0.45)",
+                  fontSize: line.type === "title" ? 13 : 11,
+                  fontWeight: line.type === "title" ? 500 : 300,
+                  letterSpacing: line.type === "title" ? "0.06em" : "0.04em",
+                }}>
+                  {line.text}
+                  {line.type === "ok" && (
+                    <span style={{ color: "rgba(16,185,129,0.5)", marginLeft: 8 }}>— OK</span>
+                  )}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          {/* Progress */}
+          <div style={{ height: 1, background: "rgba(41,182,246,0.08)", overflow: "hidden" }}>
+            <div style={{
+              height: "100%",
+              width: `${(bootStep / BOOT_LINES.length) * 100}%`,
+              background: "linear-gradient(90deg, transparent, #29b6f6 80%, #10b981)",
+              transition: "width 0.13s ease",
+            }} />
+          </div>
+        </div>
       </div>
     )
   }
 
+  // ── MAIN APP ─────────────────────────────────────
   return (
     <div style={{
-      height: "100vh", width: "100vw", overflow: "hidden",
+      height: "100vh",
       display: "flex", flexDirection: "column",
-      background: "var(--c-bg)", fontFamily: "var(--font-mono)"
+      background: "var(--c-bg)",
+      position: "relative", overflow: "hidden",
     }}>
       <div className="grid-bg" />
       <div className="vignette" />
       <div className="noise" />
 
-      {/* ── HEADER ── */}
-      <header style={{
-        height: 46, flexShrink: 0,
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "0 16px",
-        background: "rgba(0,0,0,0.88)",
-        borderBottom: "1px solid rgba(0,210,255,0.15)",
-        position: "relative", zIndex: 100,
+      {/* ═══════════ HEADER BAR ══════════════════════ */}
+      <div style={{
+        height: 44, flexShrink: 0,
+        display: "flex", alignItems: "stretch",
+        background: "rgba(4, 7, 14, 0.99)",
+        borderBottom: "1px solid rgba(41,182,246,0.12)",
+        zIndex: 100,
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-          {/* Logo */}
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <svg width="26" height="26" viewBox="0 0 26 26">
-              <circle cx="13" cy="13" r="12" fill="none" stroke="#00d2ff" strokeWidth="1" />
-              <circle cx="13" cy="13" r="7"  fill="none" stroke="rgba(0,210,255,0.4)" strokeWidth="0.8" />
-              <circle cx="13" cy="13" r="2.5" fill="#00d2ff" />
-              <line x1="13" y1="1"    x2="13" y2="4.5"  stroke="#00d2ff" strokeWidth="1.5" />
-              <line x1="13" y1="21.5" x2="13" y2="25"   stroke="#00d2ff" strokeWidth="1.5" />
-              <line x1="1"  y1="13"   x2="4.5"  y2="13" stroke="#00d2ff" strokeWidth="1.5" />
-              <line x1="21.5" y1="13" x2="25" y2="13"   stroke="#00d2ff" strokeWidth="1.5" />
-            </svg>
-            <div>
-              <div style={{
-                fontFamily: "var(--font-display)", fontWeight: 900,
-                fontSize: 15, letterSpacing: "0.4em", color: "#fff", lineHeight: 1,
-                textShadow: "0 0 20px rgba(0,210,255,0.5)"
-              }}>EYESPY</div>
-              <div style={{
-                fontFamily: "var(--font-display)", fontSize: 7,
-                letterSpacing: "0.3em", color: "rgba(0,210,255,0.5)"
-              }}>INTELLIGENCE PLATFORM</div>
-            </div>
-          </div>
-
-          <div style={{ width: 1, height: 26, background: "rgba(0,210,255,0.15)" }} />
-
-          {/* Tabs */}
-          <nav style={{ display: "flex", gap: 2 }}>
-            {TABS.map(tab => (
-              <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                style={{
-                  fontFamily: "var(--font-display)", fontSize: 8,
-                  letterSpacing: "0.2em", padding: "5px 12px",
-                  border: "1px solid",
-                  borderColor: activeTab === tab.id
-                    ? tab.id === "brief"
-                      ? "rgba(0,255,157,0.5)"
-                      : "rgba(0,210,255,0.5)"
-                    : "transparent",
-                  color: activeTab === tab.id
-                    ? tab.id === "brief" ? "#00ff9d" : "#00d2ff"
-                    : "rgba(255,255,255,0.28)",
-                  background: activeTab === tab.id
-                    ? tab.id === "brief" ? "rgba(0,255,157,0.07)" : "rgba(0,210,255,0.07)"
-                    : "transparent",
-                  textTransform: "uppercase", cursor: "pointer", transition: "all 0.2s",
-                }}>
-                {tab.label}
-              </button>
-            ))}
-          </nav>
+        {/* Logo block */}
+        <div style={{
+          width: 180,
+          display: "flex", alignItems: "center",
+          padding: "0 20px", gap: 10,
+          borderRight: "1px solid rgba(41,182,246,0.09)",
+        }}>
+          <span style={{
+            fontFamily: "var(--font-display)",
+            fontSize: 22, letterSpacing: "0.2em",
+            color: "#29b6f6",
+            textShadow: "0 0 20px rgba(41,182,246,0.45)",
+          }}>
+            EYESPY
+          </span>
+          <span style={{
+            fontFamily: "var(--font-mono)", fontSize: 8,
+            color: "rgba(41,182,246,0.3)", alignSelf: "flex-end",
+            paddingBottom: 3, letterSpacing: "0.1em",
+          }}>v4.2</span>
         </div>
 
-        {/* Right: status + clock */}
-        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-          <div style={{ display: "flex", gap: 12 }}>
-            {[
-              { label: "CRITICAL", n: 2, color: "var(--c-red)"    },
-              { label: "HIGH",     n: 3, color: "var(--c-orange)"  },
-              { label: "ELEVATED", n: 5, color: "var(--c-amber)"   },
-            ].map(s => (
-              <div key={s.label} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 9, fontFamily: "var(--font-display)" }}>
-                <div style={{ width: 5, height: 5, borderRadius: "50%", background: s.color, boxShadow: `0 0 6px ${s.color}` }} />
-                <span style={{ color: "rgba(255,255,255,0.3)", letterSpacing: "0.12em" }}>{s.label}</span>
-                <span style={{ color: s.color, fontWeight: 700 }}>{s.n}</span>
-              </div>
-            ))}
-          </div>
-          <div style={{ width: 1, height: 22, background: "rgba(0,210,255,0.12)" }} />
-          <div style={{ textAlign: "right" }}>
-            <div style={{
-              fontFamily: "var(--font-display)", fontWeight: 700,
-              fontSize: 16, letterSpacing: "0.15em",
-              color: "#00d2ff", textShadow: "0 0 16px rgba(0,210,255,0.6)"
-            }}>{utcTime} UTC</div>
-            <div style={{
-              fontSize: 8, color: "rgba(255,255,255,0.2)",
-              letterSpacing: "0.12em", fontFamily: "var(--font-display)"
-            }}>{utcDate}</div>
-          </div>
-          <div className="connected-dot" />
+        {/* Ticker */}
+        <div style={{ flex: 1, overflow: "hidden", borderRight: "1px solid rgba(41,182,246,0.09)" }}>
+          <MarketTicker />
         </div>
-      </header>
 
-      {/* ── MARKET TICKER ── */}
-      <MarketTicker />
+        {/* Right info */}
+        <div style={{
+          padding: "0 20px",
+          display: "flex", alignItems: "center", gap: 20,
+        }}>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 1 }}>
+            <span style={{
+              fontFamily: "var(--font-mono)", fontSize: 12,
+              color: "rgba(41,182,246,0.7)", letterSpacing: "0.06em",
+              fontVariantNumeric: "tabular-nums",
+            }}>{time}</span>
+            <span style={{
+              fontFamily: "var(--font-body)", fontSize: 9,
+              color: "var(--c-text3)", letterSpacing: "0.16em",
+            }}>{date}</span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <span className="connected-dot" />
+            <span style={{
+              fontFamily: "var(--font-body)", fontSize: 9,
+              color: "var(--c-green)", letterSpacing: "0.18em", fontWeight: 600,
+            }}>LIVE</span>
+          </div>
+        </div>
+      </div>
 
-      {/* ── CONTENT ── */}
-      <main style={{ flex: 1, overflow: "hidden", position: "relative", zIndex: 1 }}>
+      {/* ═══════════ TAB BAR ════════════════════════ */}
+      <div style={{
+        height: 36, flexShrink: 0,
+        display: "flex", alignItems: "stretch",
+        background: "rgba(5, 9, 16, 0.97)",
+        borderBottom: "1px solid rgba(41,182,246,0.09)",
+        zIndex: 99,
+      }}>
+        {TABS.map(t => {
+          const isActive = tab === t.id
+          return (
+            <button key={t.id} onClick={() => setTab(t.id)} style={{
+              padding: "0 22px",
+              display: "flex", alignItems: "center", gap: 8,
+              fontFamily: "var(--font-ui)",
+              fontSize: 12, fontWeight: isActive ? 500 : 400,
+              letterSpacing: "0.04em",
+              border: "none",
+              borderBottom: `2px solid ${isActive ? "#29b6f6" : "transparent"}`,
+              color: isActive ? "#e2eaf4" : "rgba(255,255,255,0.3)",
+              background: isActive ? "rgba(41,182,246,0.05)" : "transparent",
+              cursor: "pointer", transition: "all 0.18s",
+              whiteSpace: "nowrap",
+            }}>
+              <span style={{
+                fontSize: 11,
+                color: isActive ? "#29b6f6" : "rgba(255,255,255,0.18)",
+                transition: "color 0.18s",
+              }}>
+                {t.icon}
+              </span>
+              {t.label}
+            </button>
+          )
+        })}
 
-        {activeTab === "dashboard" && (
+        <div style={{ flex: 1 }} />
+
+        {/* Classification */}
+        <div style={{
+          padding: "0 18px", display: "flex", alignItems: "center",
+          borderLeft: "1px solid rgba(41,182,246,0.07)",
+        }}>
+          <span style={{
+            fontFamily: "var(--font-body)", fontSize: 9, fontWeight: 600,
+            color: "rgba(244,63,94,0.45)", letterSpacing: "0.2em",
+            border: "1px solid rgba(244,63,94,0.18)",
+            padding: "2px 9px",
+          }}>
+            CLASSIFICATION: RESTRICTED
+          </span>
+        </div>
+      </div>
+
+      {/* ═══════════ CONTENT AREA ═══════════════════ */}
+      <div style={{ flex: 1, overflow: "hidden", position: "relative", zIndex: 1 }}>
+
+        {/* ── DASHBOARD ── */}
+        {tab === "dashboard" && (
           <div style={{
             height: "100%",
             display: "grid",
-            gridTemplateColumns: "280px 1fr 300px",
+            gridTemplateColumns: "272px 1fr 356px",
             gap: 6, padding: 6,
           }}>
-            <Sidebar />
-            <div style={{ display: "flex", flexDirection: "column", gap: 6, overflow: "hidden", minHeight: 0 }}>
-              <Globe />
-              <ConflictChart />
+
+            {/* LEFT — Sidebar */}
+            <div style={{ overflow: "hidden", display: "flex", flexDirection: "column" }}>
+              <Sidebar />
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 6, overflow: "hidden", minHeight: 0 }}>
-              <LiveStream />
-              <NewsFeed />
+
+            {/* CENTRE — Globe full height, it deserves the space */}
+            <div className="panel panel-corner" style={{ overflow: "hidden" }}>
+              <Globe />
+            </div>
+
+            {/* RIGHT — Single unified panel with internal dividers */}
+            <div className="panel panel-corner" style={{
+              display: "flex", flexDirection: "column", overflow: "hidden",
+            }}>
+              {/* News feed — takes most of the space */}
+              <div style={{
+                flex: "1 1 0", minHeight: 0, overflow: "hidden",
+                display: "flex", flexDirection: "column",
+              }}>
+                <NewsFeed />
+              </div>
+
+              {/* Divider */}
+              <div style={{ height: 1, flexShrink: 0, background: "var(--c-border2)" }} />
+
+              {/* Live stream — compact fixed height */}
+              <div style={{ height: 152, flexShrink: 0, overflow: "hidden" }}>
+                <LiveStream />
+              </div>
+
+              {/* Divider */}
+              <div style={{ height: 1, flexShrink: 0, background: "var(--c-border2)" }} />
+
+              {/* Economic index — collapsible, sits at bottom */}
+              <div style={{ flexShrink: 0 }}>
+                <EconomicIndex />
+              </div>
             </div>
           </div>
         )}
 
-        {activeTab === "perspectives" && <PerspectiveToggle />}
-        {activeTab === "history"      && <TimeMachine />}
-        {activeTab === "chat"         && <Chatbot />}
-        {activeTab === "brief"        && <NewsletterSignup />}
+        {/* ── PERSPECTIVES ── */}
+        {tab === "perspectives" && (
+          <div style={{ height: "100%", padding: 6 }}>
+            <div className="panel panel-corner" style={{ height: "100%", overflow: "hidden" }}>
+              <PerspectiveToggle />
+            </div>
+          </div>
+        )}
 
-      </main>
+        {/* ── PREDICT ── */}
+        {tab === "predict" && (
+          <div style={{ height: "100%", padding: 6 }}>
+            <div className="panel panel-corner" style={{ height: "100%", overflow: "hidden" }}>
+              <PredictFuture />
+            </div>
+          </div>
+        )}
 
-      {/* ── STATUS BAR ── */}
-      <footer className="status-bar">
-        <span>◈ EYESPY v4.2.1</span>
-        <span className="status-ok">◈ ALL SYSTEMS NOMINAL</span>
-        <span>◈ SOURCES: 247 ACTIVE</span>
-        <span>◈ MODELS: ONLINE</span>
-        <div style={{ marginLeft: "auto", display: "flex", gap: 24 }}>
-          <span className="status-warn">◈ THREAT LEVEL: ELEVATED</span>
-          <span>◈ CLASSIFICATION: RESTRICTED</span>
-          <span>◈ SESSION: ALPHA-7</span>
-        </div>
-      </footer>
+        {/* ── TIME MACHINE ── */}
+        {tab === "timemachine" && (
+          <div style={{ height: "100%", padding: 6 }}>
+            <TimeMachine />
+          </div>
+        )}
+
+        {/* ── AI ANALYST ── */}
+        {tab === "analyst" && (
+          <div style={{ height: "100%", padding: 6 }}>
+            <div className="panel panel-corner" style={{
+              height: "100%",
+              display: "flex", flexDirection: "column", overflow: "hidden",
+            }}>
+              <Chatbot />
+            </div>
+          </div>
+        )}
+
+        {/* ── INTEL BRIEF ── */}
+        {tab === "brief" && (
+          <div style={{
+            height: "100%", padding: 6,
+            display: "flex", justifyContent: "center", alignItems: "flex-start",
+          }}>
+            <div style={{ width: "100%", maxWidth: 620, marginTop: 28 }}>
+              <NewsletterSignup />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ═══════════ STATUS BAR ═════════════════════ */}
+      <div className="status-bar" style={{ zIndex: 100 }}>
+        <span className="status-ok">● SYSTEMS NOMINAL</span>
+        <span>XLM-RoBERTa</span>
+        <span>KeyBERT</span>
+        <span>Groq LLaMA-3.3-70B</span>
+        <span>Scheduler</span>
+        <span>NewsAPI</span>
+        <div style={{ flex: 1 }} />
+        <span style={{ color: "var(--c-text3)", fontSize: 9 }}>
+          EYESPY INTELLIGENCE NETWORK — v4.2.1
+        </span>
+      </div>
     </div>
   )
 }

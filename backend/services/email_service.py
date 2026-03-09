@@ -5,6 +5,8 @@ Place in: backend/services/email_service.py
 
 import os
 import json
+from dotenv import load_dotenv
+load_dotenv()
 from datetime import datetime, timezone
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail, To, From, Subject, HtmlContent

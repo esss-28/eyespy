@@ -46,7 +46,7 @@ export default function LiveStream() {
   }, [])
 
   return (
-    <div className="panel panel-corner" style={{ height: 240, display: "flex", flexDirection: "column", overflow: "hidden", flexShrink: 0 }}>
+    <div style={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <div className="panel-hdr">
         <span className="live-ring">LIVE PULSE FEED</span>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
