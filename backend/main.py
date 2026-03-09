@@ -40,7 +40,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",
         "https://*.vercel.app",
-        "https://eyespy-psi.vercel.app/",
+        "https://eyespy-psi.vercel.app",
         ],
     allow_credentials=True,
     allow_methods=["*"],
