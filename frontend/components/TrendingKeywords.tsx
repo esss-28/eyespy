@@ -1,6 +1,7 @@
 "use client"
 import { useEffect, useState } from "react"
 import axios from "axios"
+import { API, WS } from "@/lib/api"
 
 export default function TrendingKeywords() {
   const [keywords, setKeywords] = useState<{word: string, mentions: number}[]>([])
@@ -9,7 +10,7 @@ export default function TrendingKeywords() {
 
   const fetchKeywords = () => {
     setLoading(true)
-    axios.get("http://localhost:8000/trending")
+    axios.get(`${API}/trending`)
       .then(r => { setKeywords(r.data.keywords || []); setLoading(false) })
       .catch(() => {
         // Fallback so widget always shows something

@@ -1,6 +1,7 @@
 "use client"
 import { useEffect, useState, useRef } from "react"
 import axios from "axios"
+import { API, WS } from "@/lib/api"
 
 type Article = {
   title: string
@@ -43,7 +44,7 @@ export default function NewsFeed() {
   const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    axios.get("http://localhost:8000/news")
+    axios.get(`${API}/news`)
       .then(r => {
         const arts = (r.data.articles || r.data || []).map((a: Article) => ({
           ...a,
@@ -56,7 +57,7 @@ export default function NewsFeed() {
       .catch(() => setLoading(false))
 
     const t = setInterval(() => {
-      axios.get("http://localhost:8000/news")
+      axios.get(`${API}/news`)
         .then(r => {
           const arts = (r.data.articles || r.data || []).map((a: Article) => ({
             ...a,

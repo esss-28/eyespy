@@ -1,6 +1,7 @@
 "use client"
 import { useEffect, useState, useMemo } from "react"
 import axios from "axios"
+import { API, WS } from "@/lib/api"
 
 const TAG_CLS: Record<string, string> = {
   MILITARY:   "tag-mil",
@@ -31,7 +32,7 @@ export default function TimeMachine() {
   const [search,   setSearch]   = useState("")
 
   useEffect(() => {
-    axios.get("http://localhost:8000/history")
+    axios.get(`${API}/history`)
       .then(r => {
         const sorted = [...r.data.events].sort(
           (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()

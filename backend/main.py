@@ -37,7 +37,11 @@ app = FastAPI(title="EyeSpy Intelligence API", version="4.2.1")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=[
+        "http://localhost:3000",
+        "https://*.vercel.app",
+        "https://eyespy-psi.vercel.app/",
+        ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -1,5 +1,6 @@
 "use client"
 import { useState } from "react"
+import { API, WS } from "@/lib/api"
 import axios from "axios"
 
 type Step = "idle" | "loading" | "success" | "error"
@@ -15,7 +16,7 @@ export default function NewsletterSignup() {
     if (!email.trim()) return
     setStep("loading")
     try {
-      const r = await axios.post("http://localhost:8000/newsletter/signup", {
+      const r = await axios.post(`${API}/newsletter/signup`, {
         email: email.trim(),
         codename: codename.trim() || "",
       })

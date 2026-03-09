@@ -1,6 +1,7 @@
 "use client"
 // LiveStream.tsx
 import { useEffect, useState, useRef } from "react"
+import { API, WS } from "@/lib/api"
 
 const SEV_COLOR: Record<string, string> = {
   NEGATIVE: "#ff2d55", NEUTRAL: "rgba(255,255,255,0.3)", POSITIVE: "#00ff9d"
@@ -22,7 +23,7 @@ export default function LiveStream() {
 
     const connect = () => {
       if (cancelled) return
-      ws = new WebSocket("ws://localhost:8000/stream")
+      ws = new WebSocket(`${WS}/stream`)
       wsRef.current = ws
       ws.onopen = () => setConnected(true)
       ws.onclose = () => {

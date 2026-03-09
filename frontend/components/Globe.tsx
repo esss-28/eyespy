@@ -1,6 +1,7 @@
 "use client"
 import React, { useEffect, useRef, useState, useCallback } from "react"
 import dynamic from "next/dynamic"
+import { API, WS } from "@/lib/api"
 import axios from "axios"
 
 // Dynamically import the globe to prevent Next.js Server-Side Rendering errors
@@ -71,7 +72,7 @@ export default function Globe() {
   // Pull threat data
   const fetchThreats = useCallback(async () => {
     try {
-      const r = await axios.get("http://localhost:8000/live-threats")
+      const r = await axios.get(`${API}/live-threats`)
       setThreats(r.data.threats || {})
       setIsLive(true)
     } catch {

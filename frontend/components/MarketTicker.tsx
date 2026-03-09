@@ -1,4 +1,5 @@
 "use client"
+import { API, WS } from "@/lib/api"
 import { useEffect, useState } from "react"
 import axios from "axios"
 
@@ -12,7 +13,7 @@ export default function MarketTicker() {
 
   useEffect(() => {
     const load = () =>
-      axios.get("http://localhost:8000/markets").then(r => setMarkets(r.data)).catch(() => {})
+      axios.get(`${API}/markets`).then(r => setMarkets(r.data)).catch(() => {})
     load()
     const interval = setInterval(load, 60000)
     return () => clearInterval(interval)

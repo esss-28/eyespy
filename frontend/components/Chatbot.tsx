@@ -1,6 +1,7 @@
 "use client"
 import { useState, useRef, useEffect } from "react"
 import axios from "axios"
+import { API, WS } from "@/lib/api"
 
 interface Message { role: "user" | "assistant"; text: string; time: Date }
 
@@ -39,7 +40,7 @@ export default function Chatbot() {
     setMessages(prev => [...prev, userMsg])
     setLoading(true)
     try {
-      const r = await axios.post(`http://localhost:8000/chat?question=${encodeURIComponent(text)}`)
+      const r = await axios.post(`${API}/chat?question=${encodeURIComponent(text)}`)
       setMessages(prev => [...prev, { role: "assistant", text: r.data.answer, time: new Date() }])
     } catch {
       setMessages(prev => [...prev, {

@@ -1,6 +1,7 @@
 "use client"
 import { useEffect, useState } from "react"
 import axios from "axios"
+import { API, WS } from "@/lib/api"
 
 const TOPIC_META: Record<string, { short: string; icon: string }> = {
   ukraine_ceasefire: { short: "Ukraine Ceasefire",    icon: "🕊" },
@@ -19,7 +20,7 @@ export default function PredictFuture() {
   const [flash,   setFlash]   = useState("")
 
   const fetchPolls = () => {
-    axios.get("http://localhost:8000/polls")
+    axios.get(`${API}/polls`)
       .then(r => { setPolls(r.data.polls || {}); setLoading(false) })
       .catch(() => setLoading(false))
   }
@@ -35,7 +36,7 @@ export default function PredictFuture() {
     setVoting(true)
     try {
       const r = await axios.post(
-        `http://localhost:8000/vote?topic=${active}&choice=${choice}`
+        `${API}/vote?topic=${active}&choice=${choice}`
       )
       setPolls(prev => ({
         ...prev,

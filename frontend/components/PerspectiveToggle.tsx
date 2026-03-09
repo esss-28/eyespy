@@ -1,5 +1,6 @@
 "use client"
 import { useState } from "react"
+import { API, WS } from "@/lib/api"
 import axios from "axios"
 
 type Perspective = "western" | "eastern" | "regional"
@@ -38,7 +39,7 @@ export default function PerspectiveToggle() {
     setData(null)
     setSearched(true)
     try {
-      const r = await axios.get(`http://localhost:8000/perspectives?topic=${encodeURIComponent(q)}`)
+      const r = await axios.get(`${API}/perspectives?topic=${encodeURIComponent(q)}`)
       setData(r.data)
     } catch {
       setError("Failed to fetch — ensure backend is running on port 8000.")

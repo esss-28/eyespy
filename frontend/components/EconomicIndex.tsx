@@ -1,6 +1,7 @@
 "use client"
 import { useEffect, useState } from "react"
 import axios from "axios"
+import { API, WS } from "@/lib/api"
 
 const LEVEL_COLOR: Record<string, string> = {
   CRITICAL: "#ff2d55",
@@ -16,7 +17,7 @@ export default function EconomicIndex() {
 
   const fetchData = () => {
     setLoading(true)
-    axios.get("http://localhost:8000/economy")
+    axios.get(`${API}/economy`)
       .then(r => { setData(r.data.economy || {}); setLoading(false) })
       .catch(() => {
         setData({

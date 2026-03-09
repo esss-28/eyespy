@@ -1,5 +1,6 @@
 "use client"
 import { useEffect, useState } from "react"
+import { API, WS } from "@/lib/api"
 import axios from "axios"
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip,
@@ -17,7 +18,7 @@ export default function ConflictChart() {
   const [history, setHistory] = useState<any[]>([])
 
   useEffect(() => {
-    axios.get("http://localhost:8000/history").then(r => {
+    axios.get(`${API}/history`).then(r => {
       const grouped: Record<string, any> = {}
       r.data.events.forEach((e: any) => {
         const month = e.date.slice(0, 7)

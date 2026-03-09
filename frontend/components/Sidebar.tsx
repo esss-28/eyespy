@@ -1,6 +1,7 @@
 "use client"
 import { useEffect, useState, useCallback } from "react"
 import axios from "axios"
+import { API, WS } from "@/lib/api"
 import TrendingKeywords from "./TrendingKeywords"
 import { RadarChart, PolarGrid, PolarAngleAxis, Radar, ResponsiveContainer } from "recharts"
 
@@ -39,7 +40,7 @@ export default function Sidebar() {
 
   const fetchThreats = useCallback(async () => {
     try {
-      const r = await axios.get("http://localhost:8000/live-threats")
+      const r = await axios.get(`${API}/live-threats`)
       setConflicts(r.data.threats)
       setLastUpdate(new Date().toUTCString().slice(17, 22) + "Z")
       setIsLive(true)
@@ -50,7 +51,7 @@ export default function Sidebar() {
         const inp = FALLBACK_INPUTS[h.id] || [0.5, 0.5, 0.5]
         try {
           const r2 = await axios.post(
-            `http://localhost:8000/conflict?sentiment=${inp[0]}&volatility=${inp[1]}&military_events=${inp[2]}`
+            `${API}/conflict?sentiment=${inp[0]}&volatility=${inp[1]}&military_events=${inp[2]}`
           )
           res[h.id] = r2.data
         } catch {
